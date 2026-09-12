@@ -1,4 +1,17 @@
-# konnect-archify-tool
+<p align="center">
+  <img src="docs/assets/konnect-archify-tool-banner.svg" alt="Konnect Archify Tool — architecture evidence, rendered clearly" width="100%">
+</p>
+
+<h1 align="center">konnect-archify-tool</h1>
+
+<p align="center"><strong>Generate polished, source-backed Konnect architecture diagrams without adding tooling to Konnect.</strong></p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5eead4.svg"></a>
+  <img alt="Archify 2.16.0" src="https://img.shields.io/badge/Archify-2.16.0-60a5fa.svg">
+  <img alt="Five diagram modes" src="https://img.shields.io/badge/diagram_modes-5-5eead4.svg">
+  <img alt="Refresh: repeatable" src="https://img.shields.io/badge/refresh-repeatable-60a5fa.svg">
+</p>
 
 A standalone documentation workspace for producing source-backed diagrams of
 [Konnect](https://github.com/neusse/Konnect) without adding Archify or Node.js
@@ -74,7 +87,9 @@ refresh workflow, and Konnect integration boundary.
 
 ## Current state
 
-- Local Git repository initialized on `main`.
+- Published as the standalone
+  [`neusse/konnect-archify-tool`](https://github.com/neusse/konnect-archify-tool)
+  repository on `main`.
 - Archify v2.16.0 copied project-locally and pinned by `skills-lock.json`.
 - Archify doctor passes on this workstation.
 - Five Konnect specifications cover every Archify diagram mode: architecture,
@@ -86,7 +101,8 @@ refresh workflow, and Konnect integration boundary.
   other four artifacts pass capture, readability, and viewer-chrome checks but
   exceed the strict 1440x900 no-scroll viewport. This remains the local release
   blocker; see [diagrams/STATUS.md](diagrams/STATUS.md).
-- Nothing has been pushed and this repository has no configured Git remote.
+- The repeatable refresh skill is packaged in-repository and can be installed
+  locally with `scripts/Install-LocalSkill.ps1`.
 
 ## Licensing
 
