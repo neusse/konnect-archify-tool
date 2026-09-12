@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Konnect Runtime Architecture",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/neusse/Konnect",
+      "revision": "8ed319a3677118e6e056712363cede1adc1245f4"
+    },
+    "viewBox": [1480, 660]
+  },
+  "components": [
+    {
+      "id": "agent_client",
+      "type": "external",
+      "label": "AI Client",
+      "sublabel": "MCP host",
+      "pos": [40, 290],
+      "size": [150, 68],
+      "sources": [{ "path": "README.md", "label": "Product and client overview" }]
+    },
+    {
+      "id": "server_process",
+      "type": "backend",
+      "label": "Konnect Process",
+      "sublabel": "stdio / Streamable HTTP",
+      "pos": [245, 290],
+      "size": [165, 68],
+      "sources": [{ "path": "crates/konnect/src/main.rs", "label": "Process entry point" }]
+    },
+    {
+      "id": "mcp_handler",
+      "type": "backend",
+      "label": "MCP Handler",
+      "sublabel": "dispatch + telemetry",
+      "pos": [465, 290],
+      "size": [170, 68],
+      "sources": [{ "path": "crates/konnect-core/src/mcp/handler.rs", "label": "MCP dispatch" }]
+    },
+    {
+      "id": "tool_router",
+      "type": "backend",
+      "label": "Tool Router",
+      "sublabel": "on-demand toolsets",
+      "pos": [690, 290],
+      "size": [160, 68],
+      "sources": [{ "path": "crates/konnect-core/src/router/registry.rs", "label": "Toolset registry" }]
+    },
+    {
+      "id": "domain_tools",
+      "type": "backend",
+      "label": "Domain Tools",
+      "sublabel": "schematic / PCB / review",
+      "pos": [905, 290],
+      "size": [175, 68],
+      "sources": [{ "path": "crates/konnect-core/src/tools/mod.rs", "label": "Tool contracts" }]
+    },
+    {
+      "id": "schematic_engine",
+      "type": "backend",
+      "label": "Schematic Engine",
+      "sublabel": "typed model + S-expressions",
+      "pos": [1140, 80],
+      "size": [180, 68],
+      "sources": [
+        { "path": "crates/konnect-schematic-editor/src/lib.rs", "label": "Typed schematic model" },
+        { "path": "crates/konnect-sexp/src/lib.rs", "label": "KiCad file primitives" }
+      ]
+    },
+    {
+      "id": "project_files",
+      "type": "database",
+      "label": "KiCad Project Files",
+      "sublabel": ".kicad_sch / .kicad_pcb",
+      "pos": [1140, 210],
+      "size": [180, 68],
+      "sources": [{ "path": "crates/konnect-sexp/src/transaction.rs", "label": "Atomic transactions" }]
+    },
+    {
+      "id": "ipc_client",
+      "type": "backend",
+      "label": "KiCad IPC Client",
+      "sublabel": "NNG + protobuf",
+      "pos": [1140, 340],
+      "size": [180, 68],
+      "sources": [{ "path": "crates/konnect-ipc/src/client.rs", "label": "Live board access" }]
+    },
+    {
+      "id": "kicad_editor",
+      "type": "external",
+      "label": "KiCad 10 PCB Editor",
+      "sublabel": "live document + undo/redo",
+      "pos": [1140, 470],
+      "size": [180, 68],
+      "sources": [{ "path": "README.md", "label": "KiCad IPC behavior" }]
+    },
+    {
+      "id": "cli_wrapper",
+      "type": "backend",
+      "label": "CLI Verification",
+      "sublabel": "checks and exports",
+      "pos": [905, 500],
+      "size": [175, 68],
+      "sources": [{ "path": "crates/konnect-core/src/tools/cli.rs", "label": "KiCad CLI wrapper" }]
+    },
+    {
+      "id": "kicad_cli",
+      "type": "external",
+      "label": "kicad-cli",
+      "sublabel": "ERC / DRC / Gerber / PDF",
+      "pos": [690, 500],
+      "size": [160, 68],
+      "sources": [{ "path": "README.md", "label": "Checks and exports" }]
+    }
+  ],
+  "connections": [
+    { "id": "client_to_server", "from": "agent_client", "to": "server_process", "label": "MCP JSON-RPC", "variant": "emphasis", "labelDy": -28 },
+    { "id": "server_to_handler", "from": "server_process", "to": "mcp_handler", "label": "dispatch" },
+    { "id": "handler_to_router", "from": "mcp_handler", "to": "tool_router", "label": "list / load / call", "labelDy": -28 },
+    { "id": "router_to_tools", "from": "tool_router", "to": "domain_tools", "label": "selected definition", "labelDy": 58 },
+    { "id": "tools_to_schematic", "from": "domain_tools", "to": "schematic_engine", "label": "saved schematic edits" },
+    { "id": "schematic_to_files", "from": "schematic_engine", "to": "project_files", "label": "revision-aware atomic write", "labelDy": 24 },
+    { "id": "tools_to_ipc", "from": "domain_tools", "to": "ipc_client", "label": "live PCB operations", "labelDy": 76 },
+    { "id": "ipc_to_editor", "from": "ipc_client", "to": "kicad_editor", "label": "KiCad IPC", "labelDy": 24 },
+    { "id": "tools_to_verify", "from": "domain_tools", "to": "cli_wrapper", "label": "verification / export", "labelDy": 24 },
+    { "id": "verify_to_cli", "from": "cli_wrapper", "to": "kicad_cli", "label": "subprocess" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "One-process MCP path",
+      "items": ["Protocol handling and domain execution remain inside the Rust server", "Toolsets load on demand to control client context"]
+    },
+    {
+      "dot": "emerald",
+      "title": "Mutation boundaries",
+      "items": ["Saved schematics use revision-aware atomic writes", "Live PCB edits use KiCad IPC and preserve editor undo/redo"]
+    },
+    {
+      "dot": "amber",
+      "title": "Independent evidence",
+      "items": ["kicad-cli supplies ERC, DRC, and export evidence", "Archify documents this flow; it does not replace KiCad validation"]
+    }
+  ]
+}

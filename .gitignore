@@ -1,0 +1,12 @@
+# Local editor and OS state
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archify transient delivery and preview files
+*.archify-candidate-*
+*.archify-preview-*
+
+# Local path configuration
+local.settings.json
