@@ -9,7 +9,12 @@
       "url": "https://github.com/neusse/Konnect",
       "revision": "8ed319a3677118e6e056712363cede1adc1245f4"
     },
-    "viewBox": [1480, 660]
+    "views": [
+      { "id": "mcp-path", "label": "MCP request path", "focus": ["agent_client", "server_process", "mcp_handler", "tool_router", "domain_tools"], "note": "Follow a client request into the selected Konnect domain tool." },
+      { "id": "mutation-paths", "label": "KiCad mutation paths", "focus": ["domain_tools", "schematic_engine", "project_files", "ipc_client", "kicad_editor"], "note": "Compare saved schematic writes with live PCB edits through KiCad IPC." },
+      { "id": "verification-path", "label": "Independent checks", "focus": ["domain_tools", "cli_wrapper", "kicad_cli"], "note": "See where Konnect obtains ERC, DRC, and export evidence." }
+    ],
+    "viewBox": [1320, 660]
   },
   "components": [
     {
@@ -62,7 +67,7 @@
       "type": "backend",
       "label": "Schematic Engine",
       "sublabel": "typed model + S-expressions",
-      "pos": [1140, 80],
+      "pos": [1100, 80],
       "size": [180, 68],
       "sources": [
         { "path": "crates/konnect-schematic-editor/src/lib.rs", "label": "Typed schematic model" },
@@ -74,7 +79,7 @@
       "type": "database",
       "label": "KiCad Project Files",
       "sublabel": ".kicad_sch / .kicad_pcb",
-      "pos": [1140, 210],
+      "pos": [1100, 210],
       "size": [180, 68],
       "sources": [{ "path": "crates/konnect-sexp/src/transaction.rs", "label": "Atomic transactions" }]
     },
@@ -83,7 +88,7 @@
       "type": "backend",
       "label": "KiCad IPC Client",
       "sublabel": "NNG + protobuf",
-      "pos": [1140, 340],
+      "pos": [1100, 340],
       "size": [180, 68],
       "sources": [{ "path": "crates/konnect-ipc/src/client.rs", "label": "Live board access" }]
     },
@@ -92,7 +97,7 @@
       "type": "external",
       "label": "KiCad 10 PCB Editor",
       "sublabel": "live document + undo/redo",
-      "pos": [1140, 470],
+      "pos": [1100, 470],
       "size": [180, 68],
       "sources": [{ "path": "README.md", "label": "KiCad IPC behavior" }]
     },

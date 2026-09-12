@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refresh Konnect diagrams"
+  short_description: "Regenerate the five source-backed Konnect Archify diagrams."
+  default_prompt: "Refresh the Konnect architecture documentation from the current source checkout and report validation evidence."

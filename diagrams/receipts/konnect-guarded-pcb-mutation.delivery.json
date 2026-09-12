@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "<tool-repo>\\diagrams\\sources\\konnect-guarded-pcb-mutation.workflow.json",
+  "output": "<tool-repo>\\diagrams\\output\\konnect-guarded-pcb-mutation.html",
+  "specification": {
+    "sha256": "9b629d1a229996407ab585220ec794a7b95ea0d89a86cbb4a278726cb3ce2078",
+    "bytes": 4993
+  },
+  "artifact": {
+    "sha256": "68e68d5ee771e510fe9bc053292049af652431f0cf7d667d27a613f42cbc1d1b",
+    "bytes": 733588
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

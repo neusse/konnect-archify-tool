@@ -4,5 +4,6 @@
 - `output/`: standalone HTML produced only by a successful `deliver` command.
 - `receipts/`: validation, delivery, and visual-check evidence.
 
-The initial `konnect-runtime.architecture.json` is a draft. It must not be moved
-to accepted output until showcase validation passes.
+The five current sources all pass Archify showcase validation. See
+[STATUS.md](STATUS.md) for direct artifact links and the remaining browser
+containment findings.

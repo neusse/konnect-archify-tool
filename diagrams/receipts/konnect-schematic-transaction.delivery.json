@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "<tool-repo>\\diagrams\\sources\\konnect-schematic-transaction.lifecycle.json",
+  "output": "<tool-repo>\\diagrams\\output\\konnect-schematic-transaction.html",
+  "specification": {
+    "sha256": "b630192f1febef2776a3ae8f928581d0b2aa7b86f326f8752e9420aa69228b1d",
+    "bytes": 4726
+  },
+  "artifact": {
+    "sha256": "48733de893aede0378a0e7a3e3a62bcdcb64b5b480ad57cfd064e9d4055257f0",
+    "bytes": 732112
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

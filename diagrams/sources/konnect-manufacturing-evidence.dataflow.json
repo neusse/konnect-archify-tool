@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Konnect Manufacturing Evidence Flow",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [1080, 760],
+    "views": [
+      { "id": "design-inputs", "label": "Design inputs", "focus": ["schematic", "board", "bom_policy", "kicad_cli"], "note": "Start from saved design files and explicit assembly policy." },
+      { "id": "evidence-gates", "label": "Evidence gates", "focus": ["erc", "drc", "bom_health", "readiness"], "note": "Unavailable or failing evidence prevents a positive manufacturing verdict." },
+      { "id": "release-output", "label": "Release output", "focus": ["readiness", "package", "preview"], "note": "A structurally complete package still requires fabrication-house preview where applicable." }
+    ]
+  },
+  "stages": [
+    { "label": "Design sources" },
+    { "label": "KiCad checks" },
+    { "label": "Konnect evidence" },
+    { "label": "Release gate" },
+    { "label": "Fabrication handoff" }
+  ],
+  "nodes": [
+    { "id": "schematic", "type": "database", "label": "Saved Schematic", "sublabel": ".kicad_sch", "stage": 0, "row": 0 },
+    { "id": "board", "type": "database", "label": "Saved Board", "sublabel": ".kicad_pcb", "stage": 0, "row": 2 },
+    { "id": "bom_policy", "type": "security", "label": "Assembly Policy", "sublabel": "MPNs + CPL corrections", "stage": 0, "row": 4 },
+    { "id": "kicad_cli", "type": "external", "label": "kicad-cli", "sublabel": "authoritative checks", "stage": 1, "row": 1 },
+    { "id": "erc", "type": "backend", "label": "ERC Result", "sublabel": "schematic findings", "stage": 2, "row": 0 },
+    { "id": "drc", "type": "backend", "label": "DRC Result", "sublabel": "all DRC categories", "stage": 2, "row": 2 },
+    { "id": "bom_health", "type": "backend", "label": "BOM Health", "sublabel": "MPN + source fields", "stage": 2, "row": 4 },
+    { "id": "readiness", "type": "security", "label": "Readiness Verdict", "sublabel": "evidence-gated", "stage": 3, "row": 2 },
+    { "id": "package", "type": "database", "label": "Manufacturing Package", "sublabel": "Gerber + drill + BOM + CPL", "stage": 4, "row": 1, "width": 150 },
+    { "id": "preview", "type": "external", "label": "Fab-house Preview", "sublabel": "physical model review", "stage": 4, "row": 4 }
+  ],
+  "flows": [
+    { "id": "schematic_erc", "from": "schematic", "to": "kicad_cli", "label": "schematic source", "classification": "local design data", "variant": "emphasis" },
+    { "id": "board_drc", "from": "board", "to": "kicad_cli", "label": "board source", "classification": "local design data", "variant": "emphasis" },
+    { "id": "cli_erc", "from": "kicad_cli", "to": "erc", "label": "ERC categories", "classification": "verification evidence", "variant": "emphasis" },
+    { "id": "cli_drc", "from": "kicad_cli", "to": "drc", "label": "complete DRC categories", "classification": "verification evidence", "variant": "emphasis" },
+    { "id": "policy_bom", "from": "bom_policy", "to": "bom_health", "label": "part identity policy", "classification": "review policy", "variant": "security", "route": "straight" },
+    { "id": "schematic_bom", "from": "schematic", "to": "bom_health", "label": "symbol fields", "classification": "BOM evidence", "fromSide": "left", "toSide": "bottom", "via": [[20, 157], [20, 660], [530, 660]], "labelAt": [100, 445] },
+    { "id": "erc_gate", "from": "erc", "to": "readiness", "label": "ERC status", "classification": "required evidence", "variant": "emphasis" },
+    { "id": "drc_gate", "from": "drc", "to": "readiness", "label": "DRC status", "classification": "required evidence", "variant": "emphasis", "labelAt": [578, 428] },
+    { "id": "bom_gate", "from": "bom_health", "to": "readiness", "label": "BOM status", "classification": "required evidence", "variant": "security" },
+    { "id": "ready_package", "from": "readiness", "to": "package", "label": "passing structural evidence", "classification": "release decision", "variant": "emphasis" },
+    { "id": "package_preview", "from": "package", "to": "preview", "label": "upload and inspect", "classification": "physical validation pending", "variant": "dashed", "labelAt": [964, 430] }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "No evidence, no clean verdict", "items": ["Unavailable ERC or DRC evidence remains incomplete", "Every KiCad DRC category retains independent failure meaning"] },
+    { "dot": "emerald", "title": "Package boundary", "items": ["Structural checks can authorize package generation", "Package completeness does not validate selected assembly models"] },
+    { "dot": "cyan", "title": "Source basis", "items": ["docs/ARCHITECTURE.md: Checks, Exports, And Verdicts", "docs/JLCPCB_CPL_CORRECTIONS.md: preview-required boundary"] }
+  ]
+}

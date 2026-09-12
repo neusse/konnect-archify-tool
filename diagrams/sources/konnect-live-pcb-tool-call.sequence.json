@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Konnect Live PCB Tool Call",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [900, 760],
+    "column_fit": "spread",
+    "views": [
+      { "id": "dispatch", "label": "MCP dispatch", "focus": ["client", "handler", "router", "tool"], "note": "Follow the request through toolset resolution and argument validation." },
+      { "id": "ipc", "label": "Live KiCad mutation", "focus": ["tool", "ipc", "kicad"], "note": "The handler confirms the target board before committing through KiCad IPC." },
+      { "id": "result", "label": "Observed return", "focus": ["kicad", "ipc", "tool", "handler", "client"], "note": "The response carries observed post-commit state back to the client." }
+    ]
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "MCP Client", "sublabel": "Codex or Claude" },
+    { "id": "handler", "type": "backend", "label": "McpHandler", "sublabel": "JSON-RPC dispatch" },
+    { "id": "router", "type": "messagebus", "label": "ToolRouter", "sublabel": "loaded definitions" },
+    { "id": "tool", "type": "backend", "label": "PCB Handler", "sublabel": "domain policy" },
+    { "id": "ipc", "type": "security", "label": "KiCadIpcClient", "sublabel": "active-board gate" },
+    { "id": "kicad", "type": "external", "label": "KiCad PCB Editor", "sublabel": "live document" }
+  ],
+  "segments": [
+    { "from": 150, "to": 330, "label": "Resolve request" },
+    { "from": 350, "to": 535, "label": "Guarded mutation" },
+    { "from": 555, "to": 685, "label": "Observed result" }
+  ],
+  "messages": [
+    { "id": "tool_call", "from": "client", "to": "handler", "y": 185, "label": "tools/call", "variant": "emphasis" },
+    { "id": "resolve_tool", "from": "handler", "to": "router", "y": 225, "label": "resolve loaded tool" },
+    { "id": "tool_definition", "from": "router", "to": "handler", "y": 265, "label": "ToolDef", "variant": "return" },
+    { "id": "execute_handler", "from": "handler", "to": "tool", "y": 310, "label": "validated arguments", "variant": "emphasis" },
+    { "id": "ensure_active", "from": "tool", "to": "ipc", "y": 385, "label": "ensure_board_is_active", "variant": "security" },
+    { "id": "query_documents", "from": "ipc", "to": "kicad", "y": 425, "label": "query open documents" },
+    { "id": "active_identity", "from": "kicad", "to": "ipc", "y": 465, "label": "active board identity", "variant": "return" },
+    { "id": "commit_mutation", "from": "ipc", "to": "kicad", "y": 510, "label": "commit one transaction", "variant": "emphasis" },
+    { "id": "committed_state", "from": "kicad", "to": "ipc", "y": 575, "label": "committed state", "variant": "return" },
+    { "id": "domain_result", "from": "ipc", "to": "tool", "y": 615, "label": "observed result", "variant": "return" },
+    { "id": "mcp_result", "from": "tool", "to": "handler", "y": 650, "label": "CallToolResult", "variant": "return" },
+    { "id": "json_reply", "from": "handler", "to": "client", "y": 670, "label": "JSON-RPC response", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "handler", "from": 180, "to": 690, "type": "backend" },
+    { "participant": "router", "from": 220, "to": 270, "type": "messagebus" },
+    { "participant": "tool", "from": 305, "to": 655, "type": "backend" },
+    { "participant": "ipc", "from": 380, "to": 620, "type": "security" },
+    { "participant": "kicad", "from": 420, "to": 580, "type": "external" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Dispatch", "items": ["The router resolves only currently loaded tool definitions", "Required arguments are checked before domain execution"] },
+    { "dot": "rose", "title": "Write gate", "items": ["The intended board must be positively active", "Ambiguous or rejected access returns without mutation"] },
+    { "dot": "emerald", "title": "Return", "items": ["KiCad owns the live document and undo transaction", "Observed post-commit state returns through MCP"] }
+  ]
+}

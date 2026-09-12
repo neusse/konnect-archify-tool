@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Konnect Guarded PCB Mutation",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "live-path", "label": "Live IPC path", "focus": ["request", "load", "dispatch", "classify", "ipc_commit", "readback"], "note": "Confirms the active board before one KiCad IPC commit." },
+      { "id": "fallback-path", "label": "Safe file fallback", "focus": ["classify", "file_gate", "file_write", "readback"], "note": "Allowed only when the live document is certainly unreachable or absent." },
+      { "id": "refusal-path", "label": "Fail-closed cases", "focus": ["classify", "refuse", "evidence"], "note": "Ambiguous or rejected targets stop without a hidden write." }
+    ]
+  },
+  "lanes": [
+    { "id": "client", "label": "AI Client" },
+    { "id": "server", "label": "Konnect MCP Server" },
+    { "id": "access", "label": "KiCad Access" },
+    { "id": "result", "label": "Evidence or Refusal", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "Discover + dispatch", "fromCol": 0, "toCol": 2 },
+    { "id": "guard", "label": "Classify access", "fromCol": 3, "toCol": 3, "variant": "security" },
+    { "id": "apply", "label": "Mutate + observe", "fromCol": 4, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": ["request", "load", "dispatch", "classify", "ipc_commit", "readback"],
+  "semanticChecks": {
+    "allowedRoots": ["request"],
+    "allowedTerminals": ["readback", "refuse", "evidence"],
+    "requiredPaths": [
+      { "from": "request", "to": "readback" },
+      { "from": "classify", "to": "refuse" }
+    ]
+  },
+  "nodes": [
+    { "id": "request", "lane": "client", "col": 0, "type": "external", "label": "PCB Tool Request", "sublabel": "target board + arguments", "width": 148 },
+    { "id": "load", "lane": "server", "col": 1, "type": "messagebus", "label": "Load Toolset", "sublabel": "on-demand schema", "width": 136 },
+    { "id": "dispatch", "lane": "server", "col": 2, "type": "backend", "label": "Dispatch Handler", "sublabel": "required-field gate", "width": 142 },
+    { "id": "classify", "lane": "server", "col": 3, "type": "security", "label": "Classify Board State", "sublabel": "active / absent / ambiguous", "width": 164 },
+    { "id": "ipc_commit", "lane": "access", "col": 4, "type": "backend", "label": "IPC Commit", "sublabel": "one undo transaction", "width": 136 },
+    { "id": "file_gate", "lane": "access", "col": 3, "type": "security", "label": "File-write Gate", "sublabel": "trusted fallback reason", "width": 142 },
+    { "id": "file_write", "lane": "access", "col": 5, "type": "database", "label": "Atomic File Write", "sublabel": "closed-board fallback", "width": 148 },
+    { "id": "readback", "lane": "result", "col": 5, "type": "database", "label": "Observed Result", "sublabel": "post-apply evidence", "width": 142 },
+    { "id": "refuse", "lane": "result", "col": 4, "type": "security", "label": "Refuse Mutation", "sublabel": "no hidden write", "width": 136 },
+    { "id": "evidence", "lane": "result", "col": 3, "type": "backend", "label": "Reason Evidence", "sublabel": "structured diagnostic", "width": 142 }
+  ],
+  "edges": [
+    { "id": "request_load", "from": "request", "to": "load", "label": "tools/call", "role": "main", "variant": "emphasis" },
+    { "id": "load_dispatch", "from": "load", "to": "dispatch", "role": "main" },
+    { "id": "dispatch_classify", "from": "dispatch", "to": "classify", "label": "resolve target", "role": "main" },
+    { "id": "classify_ipc", "from": "classify", "to": "ipc_commit", "label": "active board", "role": "main", "variant": "emphasis" },
+    { "id": "ipc_readback", "from": "ipc_commit", "to": "readback", "label": "committed state", "role": "main", "variant": "emphasis" },
+    { "id": "classify_file_gate", "from": "classify", "to": "file_gate", "label": "unreachable or absent", "role": "branch", "variant": "dashed" },
+    { "id": "file_gate_write", "from": "file_gate", "to": "file_write", "label": "fallback allowed", "role": "branch", "variant": "dashed" },
+    { "id": "file_write_readback", "from": "file_write", "to": "readback", "label": "saved bytes", "role": "return", "variant": "dashed" },
+    { "id": "classify_refuse", "from": "classify", "to": "refuse", "label": "ambiguous or rejected", "role": "error", "variant": "security" },
+    { "id": "classify_evidence", "from": "classify", "to": "evidence", "label": "observed reason", "role": "branch" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Preferred path", "items": ["Live edits require the intended board to be active", "One IPC commit preserves KiCad undo/redo"] },
+    { "dot": "rose", "title": "Fail-closed boundary", "items": ["Ambiguous document identities never become file fallback", "A reached-and-rejected request remains a refusal"] },
+    { "dot": "cyan", "title": "Source basis", "items": ["ARCHITECTURE.md: board write gates", "DEVELOPING_TOOLS.md: mutation evidence"] }
+  ]
+}

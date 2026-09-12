@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "policy": "Preserve Archify visual-check truth while allowing the documented readable-scroll baseline accepted for these detailed diagrams.",
+  "diagrams": {
+    "konnect-runtime": {
+      "strict": true
+    },
+    "konnect-guarded-pcb-mutation": {
+      "strict": false,
+      "maxScrollHeight": {
+        "1440x900": 908,
+        "1600x1000": 1000,
+        "1920x1080": 1080,
+        "2048x1320": 1320
+      }
+    },
+    "konnect-live-pcb-tool-call": {
+      "strict": false,
+      "maxScrollHeight": {
+        "1440x900": 1454,
+        "1600x1000": 1574,
+        "1920x1080": 1574,
+        "2048x1320": 1615
+      }
+    },
+    "konnect-manufacturing-evidence": {
+      "strict": false,
+      "maxScrollHeight": {
+        "1440x900": 1264,
+        "1600x1000": 1391,
+        "1920x1080": 1391,
+        "2048x1320": 1419
+      }
+    },
+    "konnect-schematic-transaction": {
+      "strict": false,
+      "maxScrollHeight": {
+        "1440x900": 1278,
+        "1600x1000": 1406,
+        "1920x1080": 1406,
+        "2048x1320": 1434
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # konnect-archify-tool
 
 A standalone documentation workspace for producing source-backed diagrams of
-[Konnect](https://github.com/mixelpixx/Konnect) without adding Archify or Node.js
+[Konnect](https://github.com/neusse/Konnect) without adding Archify or Node.js
 to Konnect's runtime, repository, or release packages.
 
 This repository vendors the Archify v2.16.0 Codex skill under
@@ -54,19 +54,42 @@ pwsh -File .\scripts\Deliver-Diagram.ps1 `
   -KonnectRepo C:\path\to\Konnect
 ```
 
+Refresh the complete stable set from a reviewed Konnect revision:
+
+```powershell
+pwsh -File .\.codex\skills\konnect-archify-refresh\scripts\Refresh-KonnectDiagrams.ps1 `
+  -ToolRepo . `
+  -KonnectRepo C:\path\to\Konnect
+```
+
+Install the refresh skill in the current Windows user's Codex skill directory:
+
+```powershell
+pwsh -File .\scripts\Install-LocalSkill.ps1
+```
+
 See [docs/WORKFLOW.md](docs/WORKFLOW.md) for the evidence and acceptance rules.
+See [docs/KONNECT_DIAGRAMS.md](docs/KONNECT_DIAGRAMS.md) for the complete model,
+refresh workflow, and Konnect integration boundary.
 
 ## Current state
 
 - Local Git repository initialized on `main`.
 - Archify v2.16.0 copied project-locally and pinned by `skills-lock.json`.
 - Archify doctor passes on this workstation.
-- The initial Konnect runtime specification is a draft: its topology passes all
-  nine artifact checks, but showcase validation still rejects desktop text
-  readability. No HTML has been presented as accepted.
+- Five Konnect specifications cover every Archify diagram mode: architecture,
+  workflow, sequence, data flow, and lifecycle.
+- Every source passes showcase validation with all nine artifact checks and zero
+  composition errors or warnings, and every HTML artifact was produced by a
+  successful transactional delivery.
+- Browser visual-check passes completely for the runtime architecture. The
+  other four artifacts pass capture, readability, and viewer-chrome checks but
+  exceed the strict 1440x900 no-scroll viewport. This remains the local release
+  blocker; see [diagrams/STATUS.md](diagrams/STATUS.md).
+- Nothing has been pushed and this repository has no configured Git remote.
 
 ## Licensing
 
-Archify retains its MIT license and third-party notices under
-`.agents/skills/archify/`. No license has yet been selected for the original
-documentation and scripts in this repository.
+Archify retains its MIT license and release metadata under
+`.agents/skills/archify/`. The original documentation, scripts, and diagram
+sources in this repository are also available under the MIT License.

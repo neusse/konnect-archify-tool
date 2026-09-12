@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "<tool-repo>\\diagrams\\sources\\konnect-live-pcb-tool-call.sequence.json",
+  "output": "<tool-repo>\\diagrams\\output\\konnect-live-pcb-tool-call.html",
+  "specification": {
+    "sha256": "720227bc72330d1f958da4a6d0313daebc77569cc50c9b5c78d21afb9d4b09ed",
+    "bytes": 4006
+  },
+  "artifact": {
+    "sha256": "321d1e7cb9188cf421620d33fecfc816fb19a26d8931d321f51f111ee7ed8d8a",
+    "bytes": 729390
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

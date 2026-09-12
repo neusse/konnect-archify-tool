@@ -7,6 +7,7 @@ Thumbs.db
 # Archify transient delivery and preview files
 *.archify-candidate-*
 *.archify-preview-*
+diagrams/output/*.visual-check.json
 
 # Local path configuration
 local.settings.json

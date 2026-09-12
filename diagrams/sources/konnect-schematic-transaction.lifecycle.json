@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Konnect Schematic Transaction Lifecycle",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [980, 700],
+    "views": [
+      { "id": "commit-path", "label": "Commit path", "focus": ["requested", "journaled", "applying", "verified", "committed"], "note": "A write-ahead journal exists before any target file changes." },
+      { "id": "recovery-path", "label": "Recovery path", "focus": ["applying", "interrupted", "inspect", "recovering", "verified"], "note": "A restart exposes the journal for explicit status and recovery." },
+      { "id": "divergence-path", "label": "Divergent target", "focus": ["inspect", "divergent", "abandoned"], "note": "Divergent content blocks automatic recovery and requires an explicit human choice." }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Transaction commit" },
+    { "id": "recovery", "label": "Recovery" },
+    { "id": "terminal", "label": "Terminal evidence" }
+  ],
+  "states": [
+    { "id": "requested", "type": "start", "label": "Requested", "sublabel": "multi-file schematic edit", "lane": "main", "col": 0, "step": "01" },
+    { "id": "journaled", "type": "active", "label": "Journaled", "sublabel": "before/after images saved", "lane": "main", "col": 1, "step": "02" },
+    { "id": "applying", "type": "active", "label": "Applying", "sublabel": "replace target files", "lane": "main", "col": 2, "step": "03" },
+    { "id": "verified", "type": "decision", "label": "Verified", "sublabel": "expected content observed", "lane": "main", "col": 3, "step": "04" },
+    { "id": "committed", "type": "success", "label": "Committed", "sublabel": "journal completed", "lane": "main", "col": 4, "step": "05" },
+    { "id": "interrupted", "type": "failure", "label": "Interrupted", "sublabel": "recoverable partial apply", "lane": "recovery", "col": 0, "width": 110, "tag": "journal retained" },
+    { "id": "inspect", "type": "waiting", "label": "Inspect Status", "sublabel": "transaction status", "lane": "recovery", "col": 1, "width": 110 },
+    { "id": "recovering", "type": "active", "label": "Recovering", "sublabel": "restore or finish targets", "lane": "recovery", "col": 2, "width": 110 },
+    { "id": "divergent", "type": "decision", "label": "Divergent Content", "sublabel": "automatic recovery blocked", "lane": "terminal", "col": 1 },
+    { "id": "abandoned", "type": "failure", "label": "Abandoned", "sublabel": "journal retained as evidence", "lane": "terminal", "col": 2, "tag": "explicit --force" }
+  ],
+  "transitions": [
+    { "id": "request_journal", "from": "requested", "to": "journaled", "label": "write journal", "variant": "emphasis", "route": "straight", "labelDy": 55 },
+    { "id": "journal_apply", "from": "journaled", "to": "applying", "label": "replace files", "route": "straight", "labelDx": -50, "labelDy": 55 },
+    { "id": "apply_verify", "from": "applying", "to": "verified", "label": "read back", "route": "straight", "labelDy": 55 },
+    { "id": "verify_commit", "from": "verified", "to": "committed", "label": "matches", "variant": "emphasis", "route": "straight", "labelDx": 60, "labelDy": 58 },
+    { "id": "apply_interrupt", "from": "applying", "to": "interrupted", "label": "stopped", "variant": "security", "route": "straight", "labelDy": 24 },
+    { "id": "interrupt_retry", "from": "interrupted", "to": "applying", "label": "retry", "variant": "emphasis", "route": "left-channel", "fromSide": "left", "toSide": "left", "channelX": 320 },
+    { "id": "interrupt_inspect", "from": "interrupted", "to": "inspect", "route": "bottom-channel", "channelY": 360 },
+    { "id": "inspect_recover", "from": "inspect", "to": "recovering", "route": "bottom-channel", "channelY": 390 },
+    { "id": "recover_verify", "from": "recovering", "to": "verified", "label": "recovered", "variant": "emphasis" },
+    { "id": "inspect_divergent", "from": "inspect", "to": "divergent", "label": "changed", "variant": "security", "labelDy": 24 },
+    { "id": "divergent_abandon", "from": "divergent", "to": "abandoned", "label": "abandon", "variant": "security", "route": "straight", "labelDy": 53 }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Write-ahead safety", "items": ["The journal is durable before any target changes", "Expected before/after content supports bounded recovery"] },
+    { "dot": "amber", "title": "Recovery ownership", "items": ["Status inspection does not print sensitive journal contents", "Unchanged targets may be restored or completed"] },
+    { "dot": "rose", "title": "Divergence", "items": ["External target changes block automatic recovery", "Abandonment preserves the journal and does not rewrite schematics"] }
+  ]
+}

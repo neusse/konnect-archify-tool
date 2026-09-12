@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "<tool-repo>\\diagrams\\sources\\konnect-manufacturing-evidence.dataflow.json",
+  "output": "<tool-repo>\\diagrams\\output\\konnect-manufacturing-evidence.html",
+  "specification": {
+    "sha256": "20290256a0bc0f897a341ac03c47b4fd4082e5c2f9790de19ab3b3fbca1500b7",
+    "bytes": 4788
+  },
+  "artifact": {
+    "sha256": "aa79121250e9a879ff1b365e1c41311207697e15b9a8775c113cd44bef093671",
+    "bytes": 733970
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}
