@@ -1,7 +1,7 @@
 # Konnect diagram status
 
 Evidence source: `neusse/Konnect` revision
-`8ed319a3677118e6e056712363cede1adc1245f4`.
+`f0f5ad045c97f02f51d1f54efd3965a1aa4e4215`.
 
 | Archify mode | Diagram | Showcase validation | Delivery | Browser visual-check |
 | --- | --- | --- | --- | --- |
