@@ -6,12 +6,12 @@
   "input": "<tool-repo>\\diagrams\\sources\\konnect-runtime.architecture.json",
   "output": "<tool-repo>\\diagrams\\output\\konnect-runtime.html",
   "specification": {
-    "sha256": "52c7805540a3db5ec593d57b713d4d99e7696441ce6ace97a3b013adbe330b3c",
-    "bytes": 6174
+    "sha256": "3f8a9fd3ef56928da7f75745fd654deebab5ab71dfe155fd8e2fef0822945d61",
+    "bytes": 6177
   },
   "artifact": {
-    "sha256": "bccf01fb939b097177818a3ab6303aae3f004e07c2d4a9297e7045d8374bc484",
-    "bytes": 733823
+    "sha256": "6d32d48d8f4a11e5e18472ed3b1e71536adce77480fe37d3562c98edf905d265",
+    "bytes": 733862
   },
   "validation": {
     "checksPassed": 9,
@@ -23,7 +23,7 @@
   },
   "evidence": {
     "verified": true,
-    "repository": "https://github.com/neusse/Konnect",
+    "repository": "https://github.com/mixelpixx/Konnect",
     "revision": "f0f5ad045c97f02f51d1f54efd3965a1aa4e4215",
     "references": 12
   }

@@ -6,8 +6,8 @@
   "visualReview": "pending",
   "artifact": {
     "path": "<tool-repo>\\diagrams\\output\\konnect-runtime.html",
-    "sha256": "bccf01fb939b097177818a3ab6303aae3f004e07c2d4a9297e7045d8374bc484",
-    "bytes": 733823
+    "sha256": "6d32d48d8f4a11e5e18472ed3b1e71536adce77480fe37d3562c98edf905d265",
+    "bytes": 733862
   },
   "state": {
     "detail": "read",

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive architecture diagrams for the Konnect KiCad automation project.">
+  <title>Konnect Architecture Diagrams</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #5f6c82;
+      --border: #d9e0eb;
+      --accent: #2157d5;
+      --shadow: 0 16px 40px rgb(20 35 65 / 10%);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1320;
+        --panel: #151e2e;
+        --text: #edf2ff;
+        --muted: #a7b3c8;
+        --border: #2b3850;
+        --accent: #8eb2ff;
+        --shadow: 0 16px 40px rgb(0 0 0 / 25%);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    main { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 64px 0; }
+    header { max-width: 760px; margin-bottom: 36px; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; letter-spacing: -0.04em; }
+    header p { margin: 0; color: var(--muted); font-size: 1.08rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 210px;
+      padding: 24px;
+      color: inherit;
+      text-decoration: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      transition: transform 150ms ease, border-color 150ms ease;
+    }
+    .card:hover, .card:focus-visible { transform: translateY(-3px); border-color: var(--accent); outline: none; }
+    .eyebrow { color: var(--accent); font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    h2 { margin: 12px 0 8px; font-size: 1.28rem; line-height: 1.25; }
+    .card p { margin: 0; color: var(--muted); }
+    .open { margin-top: auto; padding-top: 20px; color: var(--accent); font-weight: 650; }
+    footer { margin-top: 36px; color: var(--muted); font-size: .92rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Konnect architecture diagrams</h1>
+      <p>Five interactive views of Konnect's runtime, guarded PCB mutation, live tool calls, manufacturing evidence, and schematic transactions.</p>
+    </header>
+    <section class="grid" aria-label="Available diagrams">
+      <a class="card" href="konnect-runtime.html">
+        <span class="eyebrow">Architecture</span>
+        <h2>Konnect runtime</h2>
+        <p>The full path from an agent client through MCP routing, project files, IPC, and KiCad.</p>
+        <span class="open">Open diagram &rarr;</span>
+      </a>
+      <a class="card" href="konnect-guarded-pcb-mutation.html">
+        <span class="eyebrow">Workflow</span>
+        <h2>Guarded PCB mutation</h2>
+        <p>The validation and safety gates around a controlled live-board change.</p>
+        <span class="open">Open diagram &rarr;</span>
+      </a>
+      <a class="card" href="konnect-live-pcb-tool-call.html">
+        <span class="eyebrow">Sequence</span>
+        <h2>Live PCB tool call</h2>
+        <p>How a PCB request moves between the client, server, IPC bridge, and editor.</p>
+        <span class="open">Open diagram &rarr;</span>
+      </a>
+      <a class="card" href="konnect-manufacturing-evidence.html">
+        <span class="eyebrow">Data flow</span>
+        <h2>Manufacturing evidence</h2>
+        <p>Checks, exports, and artifacts used to support a fabrication handoff.</p>
+        <span class="open">Open diagram &rarr;</span>
+      </a>
+      <a class="card" href="konnect-schematic-transaction.html">
+        <span class="eyebrow">Lifecycle</span>
+        <h2>Schematic transaction</h2>
+        <p>The states and safeguards involved in atomic schematic changes.</p>
+        <span class="open">Open diagram &rarr;</span>
+      </a>
+    </section>
+    <footer>
+      Generated from pinned source evidence for <a href="https://github.com/mixelpixx/Konnect">Konnect</a>.
+    </footer>
+  </main>
+</body>
+</html>
