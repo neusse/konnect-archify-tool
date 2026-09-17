@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture review for Konnect v0.12.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose", flowchart: { curve: "basis" } });
+    </script>
+    <style>
+      body { background-image: radial-gradient(#cbd5e1 0.6px, transparent 0.6px); background-size: 18px 18px; }
+      .seam { border-style: dashed; }
+      .deep { background: linear-gradient(135deg, #0f172a, #1e293b); }
+      .candidate { box-shadow: 0 18px 48px rgba(15,23,42,.07); }
+      .arrow { color: #dc2626; font-weight: 800; }
+      .mass-interface { background: #fee2e2; border: 2px solid #ef4444; }
+      .mass-implementation { background: #e2e8f0; border: 2px solid #64748b; }
+      code { overflow-wrap: anywhere; }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-slate-900 font-sans">
+    <main class="max-w-6xl mx-auto px-6 py-12 space-y-12">
+      <header class="border-b-4 border-slate-900 pb-8">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[.28em] text-emerald-700 font-semibold">Architecture review</p>
+            <h1 class="mt-2 text-4xl md:text-5xl font-black tracking-tight">Konnect v0.12.0</h1>
+            <p class="mt-3 text-slate-600 font-mono text-sm">runtime tag ba25ad2 · reviewed checkout <a class="underline hover:text-emerald-700" href="https://github.com/mixelpixx/Konnect/commit/9d33cf0c239257f41a178cd26a2513d6e568d1c0">9d33cf0</a> · 17 Sep 2026</p>
+          </div>
+          <div class="text-xs text-slate-600 grid grid-cols-2 gap-x-5 gap-y-2 border border-slate-300 bg-white rounded-lg p-4">
+            <span class="font-semibold text-slate-900">solid box</span><span>module</span>
+            <span class="font-semibold text-slate-900">dashed line</span><span>seam</span>
+            <span class="font-semibold text-red-600">red arrow</span><span>leakage</span>
+            <span class="font-semibold text-slate-900">dark box</span><span>deep module</span>
+          </div>
+        </div>
+      </header>
+
+      <section id="candidates" class="space-y-12">
+        <article id="schematic-mutation" class="candidate rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div class="p-7 md:p-9 space-y-7">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-slate-500">Candidate 01</p>
+                <h2 class="text-2xl font-bold mt-1">Deepen schematic mutation execution</h2>
+              </div>
+              <div class="flex gap-2"><span class="rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-bold">Strong</span><span class="rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-bold">in-process</span></div>
+            </div>
+            <div class="font-mono text-xs leading-6 bg-slate-950 text-slate-200 rounded-lg p-4">sch_components.rs · sch_batch.rs · sch_wiring.rs · sch_annotate.rs · sch_hierarchy.rs · sch_export.rs<br>konnect-sexp/src/command.rs · writer.rs</div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div class="rounded-xl border border-red-200 bg-red-50/40 p-4">
+                <p class="text-xs uppercase tracking-wider font-bold text-red-700 mb-3">Before · lifecycle leaks into handlers</p>
+                <pre class="mermaid">flowchart LR
+ C[Symbol handler] --> R[read]
+ B[Batch handler] --> R2[read]
+ W[Wiring handler] --> R3[read]
+ A[Annotate handler] --> R4[read]
+ R --> V[validate] --> P[persist] --> E[readback] --> O[outcome]
+ R2 --> V2[validate] --> P2[persist] --> E2[readback] --> O2[outcome]
+ R3 --> V3[validate] --> P3[persist]
+ R4 --> P4[persist] --> E4[readback] --> O4[outcome]
+ classDef leak stroke:#dc2626,stroke-width:2px,fill:#fff1f2;
+ class R,R2,R3,R4,V,V2,V3,P,P2,P3,P4,E,E2,E4,O,O2,O4 leak;</pre>
+              </div>
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
+                <p class="text-xs uppercase tracking-wider font-bold text-emerald-800 mb-3">After · one deep mutation module</p>
+                <pre class="mermaid">flowchart LR
+ C[Symbol intent] --> M
+ B[Batch intent] --> M
+ W[Wiring intent] --> M
+ A[Annotation intent] --> M
+ subgraph M[Deep schematic mutation module]
+ direction TB
+ V[preflight] --> P[atomic persistence] --> R[committed readback] --> O[classified outcome]
+ end
+ classDef deep fill:#0f172a,color:#fff,stroke:#0f172a,stroke-width:3px;
+ class M deep;</pre>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-5 text-sm">
+              <div><h3 class="font-bold">Problem</h3><p class="mt-1 text-slate-600">Five mutation families rebuild read → plan → validate → persist → readback → uncertainty, so recent fixes repeatedly cross the same seam.</p></div>
+              <div><h3 class="font-bold">Solution</h3><p class="mt-1 text-slate-600">Keep domain planning in handlers; move persistence, conflict classification, committed readback, recovery, and common evidence behind one deep module.</p></div>
+              <div><h3 class="font-bold">Deletion test</h3><p class="mt-1 text-slate-600">Deleting it would spread the complete lifecycle back across at least five callers. Complexity concentrates rather than vanishes.</p></div>
+            </div>
+            <div><h3 class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Wins</h3><ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm"><li>Locality: conflicts have one owner</li><li>Leverage: every mutation benefits</li><li>One interface is the test surface</li><li>Single and batch stop drifting</li></ul></div>
+          </div>
+        </article>
+
+        <article id="board-access" class="candidate rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div class="p-7 md:p-9 space-y-7">
+            <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-wider text-slate-500">Candidate 02</p><h2 class="text-2xl font-bold mt-1">Make board-access policy executable</h2></div><div class="flex gap-2"><span class="rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-bold">Strong</span><span class="rounded-full bg-blue-100 text-blue-800 px-3 py-1 text-xs font-bold">ports &amp; adapters</span></div></div>
+            <div class="font-mono text-xs leading-6 bg-slate-950 text-slate-200 rounded-lg p-4">tools/mod.rs · board_session.rs · pcb_board.rs · pcb_components.rs · placement.rs · pcb_sync.rs · drc.rs<br>konnect-ipc/src/client.rs · konnect/src/install.rs</div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div class="rounded-xl border border-red-200 bg-red-50/40 p-5 min-h-[320px]">
+                <p class="text-xs uppercase tracking-wider font-bold text-red-700">Before · declaration and execution split</p>
+                <div class="mt-6 grid grid-cols-[1fr_auto_1fr] gap-3 items-center text-center text-xs">
+                  <div class="border-2 rounded-lg p-4 bg-white"><b>BoardAccess</b><br><span class="text-slate-500">guidance only</span></div><div class="arrow">≠</div><div class="border-2 border-red-400 rounded-lg p-4 bg-white"><b>handler choice</b><br><span class="text-slate-500">manual policy</span></div>
+                </div>
+                <div class="mt-6 grid grid-cols-3 gap-2 text-center text-xs"><div class="border rounded p-3">direct IPC</div><div class="border rounded p-3">attempt fallback</div><div class="border rounded p-3">refuse file edit</div></div>
+                <p class="mt-6 text-red-700 text-sm">The interface can claim one policy while the implementation selects another.</p>
+              </div>
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5 min-h-[320px]">
+                <p class="text-xs uppercase tracking-wider font-bold text-emerald-800">After · policy drives one deep module</p>
+                <div class="deep text-white rounded-xl p-5 mt-6 text-center"><p class="text-xs uppercase tracking-wider text-emerald-300">Deep board-operation module</p><p class="font-bold mt-2">target identity · source authority · ownership memory · classified result</p></div>
+                <div class="border-l-2 border-dashed border-slate-500 h-8 mx-auto w-0"></div>
+                <div class="grid grid-cols-2 gap-4 text-center text-xs"><div class="border-2 border-blue-400 bg-white rounded-lg p-4"><b>live IPC adapter</b><br>exact open document</div><div class="border-2 border-amber-400 bg-white rounded-lg p-4"><b>saved-file adapter</b><br>guarded fallback</div></div>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-5 text-sm"><div><h3 class="font-bold">Problem</h3><p class="mt-1 text-slate-600"><code>ToolDef::board_access</code> describes policy, but handlers separately choose live IPC, fallback, or refusal. Metadata and behavior can disagree.</p></div><div><h3 class="font-bold">Solution</h3><p class="mt-1 text-slate-600">Let the declaration drive one board-operation module. Live IPC and guarded saved-file access are two real adapters at one justified seam.</p></div><div><h3 class="font-bold">Deletion test</h3><p class="mt-1 text-slate-600">Today deleting <code>BoardAccess</code> removes guidance but not safety behavior: it is shallow. Deepening makes deletion spread target and fallback policy everywhere.</p></div></div>
+            <div><h3 class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Wins</h3><ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm"><li>One policy source</li><li>Locality: wrong-board fixes concentrate</li><li>Leverage across every PCB tool</li><li>Catalogue-wide conformance tests</li></ul></div>
+          </div>
+        </article>
+
+        <article id="tool-contract" class="candidate rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div class="p-7 md:p-9 space-y-7">
+            <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-wider text-slate-500">Candidate 03</p><h2 class="text-2xl font-bold mt-1">Deepen typed tool-contract execution</h2></div><div class="flex gap-2"><span class="rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-bold">Worth exploring</span><span class="rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-bold">in-process</span></div></div>
+            <div class="font-mono text-xs leading-6 bg-slate-950 text-slate-200 rounded-lg p-4">tools/mod.rs · mcp/handler.rs · outcome.rs · all tool-registration modules</div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div class="rounded-xl border border-red-200 bg-red-50/40 p-5 min-h-[320px]"><p class="text-xs uppercase tracking-wider font-bold text-red-700">Before · shallow contract</p><div class="mt-8 space-y-3"><div class="mass-interface h-20 rounded flex items-center justify-center text-sm font-bold">JSON Schema + required pass + helper parsing + handler defaults</div><div class="mass-implementation h-24 rounded flex items-center justify-center text-sm font-bold">raw Value → handwritten JSON response</div><div class="grid grid-cols-4 gap-2 text-[11px] text-center"><div class="border p-2 bg-white">schema</div><div class="border p-2 bg-white">require_*</div><div class="border p-2 bg-white">domain rule</div><div class="border p-2 bg-white">outcome</div></div></div></div>
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5 min-h-[320px]"><p class="text-xs uppercase tracking-wider font-bold text-emerald-800">After · deeper contract</p><div class="mt-8"><div class="h-10 rounded-t bg-emerald-200 border-2 border-emerald-700 flex items-center justify-center text-sm font-bold">small typed execution interface</div><div class="deep h-44 rounded-b text-white p-6 flex flex-col justify-center text-center"><b>input interpretation</b><span class="text-slate-300">domain validation · compatibility rendering · structured outcomes · dispatch evidence</span></div></div></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-5 text-sm"><div><h3 class="font-bold">Problem</h3><p class="mt-1 text-slate-600">Declared inputs are reinterpreted by handlers, and most results are hand-serialized. The same contract exists in several places.</p></div><div><h3 class="font-bold">Solution</h3><p class="mt-1 text-slate-600">Deepen tool registration around existing argument helpers and structured outcomes, migrating one tool family at a time.</p></div><div><h3 class="font-bold">Deletion test</h3><p class="mt-1 text-slate-600">Argument helpers already pass: deletion duplicates parsing hundreds of times. Deepen the enclosing module so callers stop maintaining the contract twice.</p></div></div>
+            <div class="rounded-lg bg-amber-50 border border-amber-300 p-3 text-sm"><b>Constraint:</b> the reliability contract requires incremental adoption and preservation of existing response fields. No big-bang conversion.</div>
+            <div><h3 class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Wins</h3><ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm"><li>Schema gains more leverage</li><li>Inputs and implementation stay local</li><li>One interface for deployed tests</li><li>Fewer response-shape drifts</li></ul></div>
+          </div>
+        </article>
+
+        <article id="audit-engine" class="candidate rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div class="p-7 md:p-9 space-y-7">
+            <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-wider text-slate-500">Candidate 04</p><h2 class="text-2xl font-bold mt-1">Put design review behind a typed audit engine</h2></div><div class="flex gap-2"><span class="rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-bold">Strong</span><span class="rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-bold">in-process</span></div></div>
+            <div class="font-mono text-xs leading-6 bg-slate-950 text-slate-200 rounded-lg p-4">design_review.rs · cli.rs · drc.rs</div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div class="rounded-xl border border-red-200 bg-red-50/40 p-4"><p class="text-xs uppercase tracking-wider font-bold text-red-700 mb-3">Before · serialized response is an internal seam</p><pre class="mermaid">sequenceDiagram
+ participant R as Unified review
+ participant H as Private tool handler
+ participant J as JSON text
+ participant A as Aggregate
+ R->>H: call handler
+ H-->>R: CallToolResult
+ R->>J: extract text
+ J->>R: parse JSON again
+ R->>A: infer findings + coverage
+ A-->>R: calculate verdict</pre></div>
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4"><p class="text-xs uppercase tracking-wider font-bold text-emerald-800 mb-3">After · typed result, rendering adapters</p><pre class="mermaid">flowchart TB
+ S[Schematic audit] --> E
+ B[Board coverage] --> E
+ D[DRC evidence] --> E
+ subgraph E[Deep typed audit engine]
+ F[findings] --> C[coverage] --> V[verdict]
+ end
+ E --> U[Unified review adapter]
+ E --> T[Standalone tool adapters]
+ classDef deep fill:#0f172a,color:#fff,stroke:#0f172a,stroke-width:3px;
+ class E deep;</pre></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-5 text-sm"><div><h3 class="font-bold">Problem</h3><p class="mt-1 text-slate-600">Unified review calls private handlers, extracts response text, parses it back to JSON, then calculates coverage and verdict.</p></div><div><h3 class="font-bold">Solution</h3><p class="mt-1 text-slate-600">Own audits, diagnostics, evidence coverage, and verdict in a typed module. MCP tools become rendering adapters.</p></div><div><h3 class="font-bold">Deletion test</h3><p class="mt-1 text-slate-600">Current handler-to-handler adapters are shallow. Deleting a typed engine would spread verdict rules across every review-facing caller.</p></div></div>
+            <div><h3 class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Wins</h3><ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm"><li>One verdict owner</li><li>Typed findings are the test surface</li><li>No response re-parsing</li><li>Unavailable evidence stays visible</li></ul></div>
+          </div>
+        </article>
+
+        <article id="library-catalog" class="candidate rounded-2xl border border-slate-200 bg-white overflow-hidden">
+          <div class="p-7 md:p-9 space-y-7">
+            <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-wider text-slate-500">Candidate 05</p><h2 class="text-2xl font-bold mt-1">Deepen the KiCad library catalog</h2></div><div class="flex gap-2"><span class="rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-bold">Worth exploring</span><span class="rounded-full bg-slate-200 text-slate-800 px-3 py-1 text-xs font-bold">local-substitutable</span></div></div>
+            <div class="font-mono text-xs leading-6 bg-slate-950 text-slate-200 rounded-lg p-4">library.rs · pcb_components.rs · pcb_footprint_update.rs · sch_components.rs · sch_batch.rs<br>konnect-schematic-editor/src/library.rs</div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div class="rounded-xl border border-red-200 bg-red-50/40 p-5 min-h-[320px]"><p class="text-xs uppercase tracking-wider font-bold text-red-700">Before · catalog knowledge is scattered</p><div class="relative mt-5 grid grid-cols-2 gap-3 text-xs text-center"><div class="border-2 border-red-300 bg-white p-4 rounded">table precedence</div><div class="border-2 border-red-300 bg-white p-4 rounded">URI expansion</div><div class="border-2 border-red-300 bg-white p-4 rounded">installed fallback</div><div class="border-2 border-red-300 bg-white p-4 rounded">project context</div><div class="col-span-2 border-2 border-red-500 bg-white p-4 rounded">symbol / footprint resolution evidence</div></div><p class="mt-5 text-sm text-red-700">Understanding “where did this item come from?” crosses several sections and modules.</p></div>
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5 min-h-[320px]"><p class="text-xs uppercase tracking-wider font-bold text-emerald-800">After · one concrete deep catalog</p><div class="deep text-white rounded-xl p-6 mt-5 text-center"><p class="text-xs uppercase tracking-wider text-emerald-300">KiCad library catalog module</p><p class="font-bold mt-2">precedence · expansion · context · resolution · provenance</p><div class="mt-5 grid grid-cols-2 gap-2 text-xs text-slate-900"><div class="bg-white rounded p-3">symbol builders</div><div class="bg-white rounded p-3">footprint builders</div><div class="bg-white rounded p-3">placement tools</div><div class="bg-white rounded p-3">refresh tools</div></div></div></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-5 text-sm"><div><h3 class="font-bold">Problem</h3><p class="mt-1 text-slate-600"><code>library.rs</code> is deep overall, but catalog policy has low locality across table, environment, project, search, and consumer code.</p></div><div><h3 class="font-bold">Solution</h3><p class="mt-1 text-slate-600">Extract one concrete internal catalog module that owns resolution and provenance. Keep symbol and footprint builders as separate implementations.</p></div><div><h3 class="font-bold">Deletion test</h3><p class="mt-1 text-slate-600">The whole file passes; size alone is not the defect. The catalog portion earns depth when deletion spreads resolution policy back across consumers.</p></div></div>
+            <div class="rounded-lg bg-slate-100 border border-slate-300 p-3 text-sm"><b>Seam discipline:</b> do not invent a trait merely to split the file. One adapter is hypothetical; add an interface only when a second catalog adapter exists.</div>
+            <div><h3 class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Wins</h3><ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm"><li>Resolution policy gains locality</li><li>Provenance has one owner</li><li>Builders consume one catalog</li><li>Search and placement stop drifting</li></ul></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="top-recommendation" class="deep rounded-2xl text-white p-8 md:p-10 shadow-2xl">
+        <p class="text-xs uppercase tracking-[.25em] text-emerald-300 font-semibold">Top recommendation</p>
+        <h2 class="text-3xl font-black mt-3"><a class="hover:text-emerald-300" href="#schematic-mutation">Deepen schematic mutation execution</a></h2>
+        <p class="mt-4 text-slate-300 max-w-3xl">It is the clearest concentration of v0.12.0 churn, has a bounded migration path, and makes the interface the test surface for the exact failure class Konnect has repeatedly repaired: refusal, persistence, readback, uncertainty, and recovery.</p>
+      </section>
+
+      <footer class="text-xs text-slate-500 border-t border-slate-300 pt-5 flex flex-wrap justify-between gap-3"><span>Read-only review of <a class="underline" href="https://github.com/mixelpixx/Konnect">mixelpixx/Konnect</a>. No Konnect source files changed.</span><span>No CONTEXT.md or ADR directory existed; DEV.md, ARCHITECTURE docs, and RELIABILITY_CONTRACT.md supplied domain constraints.</span></footer>
+    </main>
+  </body>
+</html>
