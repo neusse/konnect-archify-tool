@@ -3,9 +3,9 @@
   "diagram_type": "sequence",
   "meta": {
     "title": "Konnect Live PCB Tool Call",
+    "output": "diagrams/output/konnect-live-pcb-tool-call.html",
     "locale": "en",
     "quality_profile": "showcase",
-    "viewBox": [900, 760],
     "column_fit": "spread",
     "views": [
       { "id": "dispatch", "label": "MCP dispatch", "focus": ["client", "handler", "router", "tool"], "note": "Follow the request through toolset resolution and argument validation." },

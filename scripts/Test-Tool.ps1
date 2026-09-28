@@ -14,8 +14,8 @@ if (-not (Test-Path -LiteralPath $lock -PathType Leaf)) {
 }
 
 $lockData = Get-Content -LiteralPath $lock -Raw | ConvertFrom-Json
-if ($lockData.skills.archify.ref -ne 'v2.16.0') {
-    throw "Expected Archify v2.16.0, found '$($lockData.skills.archify.ref)'."
+if ($lockData.skills.archify.ref -ne 'v3.0.1') {
+    throw "Expected Archify v3.0.1, found '$($lockData.skills.archify.ref)'."
 }
 
 & node $cli doctor

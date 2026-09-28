@@ -3,6 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "Konnect Runtime Architecture",
+    "output": "diagrams/output/konnect-runtime.html",
     "locale": "en",
     "quality_profile": "showcase",
     "repository": {
@@ -14,7 +15,7 @@
       { "id": "mutation-paths", "label": "KiCad mutation paths", "focus": ["domain_tools", "schematic_engine", "project_files", "ipc_client", "kicad_editor"], "note": "Compare saved schematic writes with live PCB edits through KiCad IPC." },
       { "id": "verification-path", "label": "Independent checks", "focus": ["domain_tools", "cli_wrapper", "kicad_cli"], "note": "See where Konnect obtains ERC, DRC, and export evidence." }
     ],
-    "viewBox": [1320, 660]
+    "viewBox": [1240, 660]
   },
   "components": [
     {
@@ -49,7 +50,7 @@
       "type": "backend",
       "label": "Tool Router",
       "sublabel": "on-demand toolsets",
-      "pos": [690, 290],
+      "pos": [660, 290],
       "size": [160, 68],
       "sources": [{ "path": "crates/konnect-core/src/router/registry.rs", "label": "Toolset registry" }]
     },
@@ -58,8 +59,8 @@
       "type": "backend",
       "label": "Domain Tools",
       "sublabel": "schematic / PCB / review",
-      "pos": [905, 290],
-      "size": [175, 68],
+      "pos": [845, 290],
+      "size": [155, 68],
       "sources": [{ "path": "crates/konnect-core/src/tools/mod.rs", "label": "Tool contracts" }]
     },
     {
@@ -67,7 +68,7 @@
       "type": "backend",
       "label": "Schematic Engine",
       "sublabel": "typed model + S-expressions",
-      "pos": [1100, 80],
+      "pos": [1020, 80],
       "size": [180, 68],
       "sources": [
         { "path": "crates/konnect-schematic-editor/src/lib.rs", "label": "Typed schematic model" },
@@ -79,7 +80,7 @@
       "type": "database",
       "label": "KiCad Project Files",
       "sublabel": ".kicad_sch / .kicad_pcb",
-      "pos": [1100, 210],
+      "pos": [1020, 210],
       "size": [180, 68],
       "sources": [{ "path": "crates/konnect-sexp/src/transaction.rs", "label": "Atomic transactions" }]
     },
@@ -88,7 +89,7 @@
       "type": "backend",
       "label": "KiCad IPC Client",
       "sublabel": "NNG + protobuf",
-      "pos": [1100, 340],
+      "pos": [1020, 340],
       "size": [180, 68],
       "sources": [{ "path": "crates/konnect-ipc/src/client.rs", "label": "Live board access" }]
     },
@@ -97,7 +98,7 @@
       "type": "external",
       "label": "KiCad 10 PCB Editor",
       "sublabel": "live document + undo/redo",
-      "pos": [1100, 470],
+      "pos": [1020, 470],
       "size": [180, 68],
       "sources": [{ "path": "README.md", "label": "KiCad IPC behavior" }]
     },
@@ -106,8 +107,8 @@
       "type": "backend",
       "label": "CLI Verification",
       "sublabel": "checks and exports",
-      "pos": [905, 500],
-      "size": [175, 68],
+      "pos": [845, 500],
+      "size": [155, 68],
       "sources": [{ "path": "crates/konnect-core/src/tools/cli.rs", "label": "KiCad CLI wrapper" }]
     },
     {
@@ -115,7 +116,7 @@
       "type": "external",
       "label": "kicad-cli",
       "sublabel": "ERC / DRC / Gerber / PDF",
-      "pos": [690, 500],
+      "pos": [610, 500],
       "size": [160, 68],
       "sources": [{ "path": "README.md", "label": "Checks and exports" }]
     }
@@ -127,7 +128,7 @@
     { "id": "router_to_tools", "from": "tool_router", "to": "domain_tools", "label": "selected definition", "labelDy": 58 },
     { "id": "tools_to_schematic", "from": "domain_tools", "to": "schematic_engine", "label": "saved schematic edits" },
     { "id": "schematic_to_files", "from": "schematic_engine", "to": "project_files", "label": "revision-aware atomic write", "labelDy": 24 },
-    { "id": "tools_to_ipc", "from": "domain_tools", "to": "ipc_client", "label": "live PCB operations", "labelDy": 76 },
+    { "id": "tools_to_ipc", "from": "domain_tools", "to": "ipc_client", "label": "live PCB operations", "labelDy": 83 },
     { "id": "ipc_to_editor", "from": "ipc_client", "to": "kicad_editor", "label": "KiCad IPC", "labelDy": 24 },
     { "id": "tools_to_verify", "from": "domain_tools", "to": "cli_wrapper", "label": "verification / export", "labelDy": 24 },
     { "id": "verify_to_cli", "from": "cli_wrapper", "to": "kicad_cli", "label": "subprocess" }

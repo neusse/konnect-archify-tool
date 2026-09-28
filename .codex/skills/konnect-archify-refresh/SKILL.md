@@ -31,15 +31,15 @@ Konnect runtime repository.
      -KonnectRepo C:\path\to\Konnect
    ```
 
-   Use `-VisualPolicy strict` only when the user requires every artifact to fit
-   without scrolling. The default baseline policy preserves raw failing
-   Archify receipts and accepts only the documented readable vertical-scroll
-   envelope; it never labels those receipts as visual-check passes.
+   Use `-VisualPolicy strict` when the user requires every artifact to fit
+   without scrolling. The default baseline policy still requires a passing raw
+   Archify visual-check receipt, but permits Archify's documented
+   readable-scroll allowance.
 5. Inspect every generated light and dark screenshot. The refresh is incomplete
    if content is clipped, relationships overlap nodes, hierarchy is unclear, or
    text is unreadable.
 6. Update `diagrams/STATUS.md` with the target revision and observed receipt
-   statuses. Report source/artifact hashes and any baseline exception.
+   statuses. Report source/artifact hashes and any readable-scroll exception.
 
 ## Publishing boundary
 

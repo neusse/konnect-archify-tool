@@ -8,6 +8,11 @@ Thumbs.db
 *.archify-candidate-*
 *.archify-preview-*
 diagrams/output/*.visual-check.json
+diagrams/output/*.delivery.json
+diagrams/output/*.browser-check.json
+diagrams/output/*.finalize.json
+diagrams/output/*.finalize-summary.json
+diagrams/.raw-evidence/
 
 # Local path configuration
 local.settings.json

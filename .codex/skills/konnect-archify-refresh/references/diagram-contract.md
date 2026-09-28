@@ -30,12 +30,13 @@ churn.
 
 ## Acceptance truth
 
-- Showcase validation: nine checks, zero composition errors, zero warnings.
-- Delivery: exact source and artifact SHA-256 receipts.
-- Visual evidence: retain the raw Archify status. The project baseline may
-  accept documented vertical scrolling only when capture, readability, and
-  viewer-chrome checks pass and no viewport regresses beyond
-  `diagrams/visual-baseline.json`.
+- Finalize: validate, transactional delivery, artifact check, and browser-check
+  all pass with zero composition errors or warnings.
+- Receipts: retain exact source and artifact SHA-256 identities using portable
+  repository-root markers.
+- Visual evidence: retain the raw Archify status. Baseline policy accepts an
+  Archify pass that uses its documented readable-scroll allowance; strict
+  policy additionally requires every tested viewport to fit without scrolling.
 - Visual inspection: review every light and dark contact-sheet capture. Record
   clipped content, overlaps, weak hierarchy, or unreadable labels as failures.
 - Manufacturing boundary: ERC, DRC, BOM, and package structure are evidence;

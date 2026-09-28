@@ -4,3 +4,4 @@
 *.md text eol=lf
 diagrams/output/*.html linguist-generated=true
 diagrams/output/*.png binary
+diagrams/evidence/**/*.png binary

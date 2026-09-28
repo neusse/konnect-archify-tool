@@ -1,9 +1,8 @@
 # Accepted output
 
-Only HTML produced by a successful Archify `deliver` command belongs here.
-Draft renders and stale last-good artifacts are not accepted documentation.
+Only HTML produced by a successful Archify `finalize` command belongs here.
+Draft renders and transactional sidecars are not accepted documentation.
 
-The five current HTML files all have successful delivery receipts. Only
-`konnect-runtime.html` currently passes the full no-scroll browser visual-check;
-the other four remain reviewable delivered artifacts with a documented 1440x900
-containment failure.
+The five current HTML files pass validate, deliver, check, browser-check, and
+visual-check under Archify v3.0.1. Screenshot evidence lives outside this
+publishable directory under `diagrams/evidence/archify-3.0.1/`.

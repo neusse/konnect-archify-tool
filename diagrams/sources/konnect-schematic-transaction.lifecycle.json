@@ -3,9 +3,10 @@
   "diagram_type": "lifecycle",
   "meta": {
     "title": "Konnect Schematic Transaction Lifecycle",
+    "output": "diagrams/output/konnect-schematic-transaction.html",
     "locale": "en",
     "quality_profile": "showcase",
-    "viewBox": [980, 700],
+    "viewBox": [1000, 630],
     "views": [
       { "id": "commit-path", "label": "Commit path", "focus": ["requested", "journaled", "applying", "verified", "committed"], "note": "A write-ahead journal exists before any target file changes." },
       { "id": "recovery-path", "label": "Recovery path", "focus": ["applying", "interrupted", "inspect", "recovering", "verified"], "note": "A restart exposes the journal for explicit status and recovery." },

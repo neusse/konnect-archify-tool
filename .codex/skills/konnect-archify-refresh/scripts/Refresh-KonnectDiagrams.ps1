@@ -49,9 +49,13 @@ $konnectRoot = Resolve-Repository -RequestedPath $KonnectRepo -Candidates @(
 ) -Marker 'docs\ARCHITECTURE.md' -Name 'Konnect'
 
 $cli = Join-Path $toolRoot '.agents\skills\archify\bin\archify.mjs'
-$baselinePath = Join-Path $toolRoot 'diagrams\visual-baseline.json'
+$releaseManifest = Join-Path $toolRoot '.agents\skills\archify\skill-release.json'
+$archifyRelease = Get-Content -LiteralPath $releaseManifest -Raw | ConvertFrom-Json
+$evidenceVersion = "archify-$($archifyRelease.version)"
 $outputRoot = Join-Path $toolRoot 'diagrams\output'
 $receiptRoot = Join-Path $toolRoot 'diagrams\receipts'
+$rawEvidenceRoot = Join-Path $toolRoot "diagrams\.raw-evidence\$evidenceVersion"
+$publicEvidenceRoot = Join-Path $toolRoot "diagrams\evidence\$evidenceVersion"
 $revision = (& git -C $konnectRoot rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0) {
     throw 'Unable to read the Konnect revision.'
@@ -65,13 +69,22 @@ function ConvertTo-PublicReceipt {
     return $Text.Replace($escapedToolRoot, '<tool-repo>').Replace($escapedKonnectRoot, '<konnect-repo>').Replace($toolRoot, '<tool-repo>').Replace($konnectRoot, '<konnect-repo>')
 }
 
+function Write-PublicReceipt {
+    param(
+        [string]$Path,
+        [string]$Text
+    )
+
+    $content = (ConvertTo-PublicReceipt $Text).TrimEnd() + [Environment]::NewLine
+    [System.IO.File]::WriteAllText($Path, $content, [System.Text.UTF8Encoding]::new($false))
+}
+
 $architectureSource = Join-Path $toolRoot 'diagrams\sources\konnect-runtime.architecture.json'
 $architecture = Get-Content -LiteralPath $architectureSource -Raw | ConvertFrom-Json
 if ($architecture.meta.repository.revision -ne $revision) {
     throw "The architecture source pins $($architecture.meta.repository.revision), but Konnect is at $revision. Review source drift and update the affected diagram specifications before regeneration."
 }
 
-$baseline = Get-Content -LiteralPath $baselinePath -Raw | ConvertFrom-Json
 $items = @(
     @{ Type = 'architecture'; Base = 'konnect-runtime'; Source = $architectureSource; RepositoryEvidence = $true },
     @{ Type = 'workflow'; Base = 'konnect-guarded-pcb-mutation'; Source = (Join-Path $toolRoot 'diagrams\sources\konnect-guarded-pcb-mutation.workflow.json'); RepositoryEvidence = $false },
@@ -82,6 +95,8 @@ $items = @(
 
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 New-Item -ItemType Directory -Path $receiptRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $rawEvidenceRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $publicEvidenceRoot -Force | Out-Null
 $results = @()
 
 foreach ($item in $items) {
@@ -90,54 +105,53 @@ foreach ($item in $items) {
         $extra = @('--repo-root', $konnectRoot)
     }
 
-    $validationArgs = @($cli, 'validate', $item.Type, $item.Source, '--quality', 'showcase', '--json') + $extra
-    $validationText = (& node @validationArgs | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) {
-        throw "Validation failed for $($item.Base):`n$validationText"
-    }
-    (ConvertTo-PublicReceipt $validationText) | Set-Content -LiteralPath (Join-Path $receiptRoot "$($item.Base).validation.json") -Encoding utf8
-
     $outputPath = Join-Path $outputRoot "$($item.Base).html"
-    $deliveryArgs = @($cli, 'deliver', $item.Type, $item.Source, $outputPath, '--quality', 'showcase', '--json') + $extra
-    $deliveryText = (& node @deliveryArgs | Out-String).Trim()
+    $rawItemEvidence = Join-Path $rawEvidenceRoot $item.Base
+    $publicItemEvidence = Join-Path $publicEvidenceRoot $item.Base
+    New-Item -ItemType Directory -Path $rawItemEvidence -Force | Out-Null
+    New-Item -ItemType Directory -Path $publicItemEvidence -Force | Out-Null
+
+    $finalizeArgs = @($cli, 'finalize', $item.Type, $item.Source, $outputPath, '--quality', 'showcase', '--out-dir', $rawItemEvidence, '--json') + $extra
+    $finalizeText = (& node @finalizeArgs | Out-String).Trim()
     if ($LASTEXITCODE -ne 0) {
-        throw "Delivery failed for $($item.Base):`n$deliveryText"
+        throw "Finalize failed for $($item.Base):`n$finalizeText"
     }
-    (ConvertTo-PublicReceipt $deliveryText) | Set-Content -LiteralPath (Join-Path $receiptRoot "$($item.Base).delivery.json") -Encoding utf8
+    $finalizeReceipt = $finalizeText | ConvertFrom-Json
+    if (-not $finalizeReceipt.ok -or $finalizeReceipt.status -ne 'pass' -or
+        $finalizeReceipt.gates.validate -ne 'pass' -or
+        $finalizeReceipt.gates.deliver -ne 'pass' -or
+        $finalizeReceipt.gates.check -ne 'pass' -or
+        $finalizeReceipt.gates.'browser-check' -ne 'pass') {
+        throw "Finalize receipt for $($item.Base) did not pass every required gate."
+    }
+    Write-PublicReceipt -Path (Join-Path $receiptRoot "$($item.Base).finalize.json") -Text $finalizeText
 
-    $visualText = (& node $cli visual-check $outputPath --json | Out-String).Trim()
+    $visualText = (& node $cli visual-check $outputPath --out-dir $rawItemEvidence --summary --require-provenance | Out-String).Trim()
     $visualExit = $LASTEXITCODE
-    $visualReceipt = $visualText | ConvertFrom-Json
-    (ConvertTo-PublicReceipt $visualText) | Set-Content -LiteralPath (Join-Path $receiptRoot "$($item.Base).visual-check.json") -Encoding utf8
+    $visualSummary = $visualText | ConvertFrom-Json
+    if ($visualExit -ne 0 -or -not $visualSummary.ok -or $visualSummary.status -ne 'pass') {
+        throw "Visual evidence for $($item.Base) failed: $visualText"
+    }
+    $visualReceiptText = Get-Content -LiteralPath $visualSummary.evidence.receipt -Raw
+    $visualReceipt = $visualReceiptText | ConvertFrom-Json
+    Write-PublicReceipt -Path (Join-Path $receiptRoot "$($item.Base).visual-check.json") -Text $visualReceiptText
 
-    $acceptedVisual = $visualExit -eq 0
-    $visualStatus = if ($acceptedVisual) { 'pass' } else { 'fail' }
-    if (-not $acceptedVisual -and $VisualPolicy -eq 'baseline') {
-        $diagramBaseline = $baseline.diagrams.($item.Base)
-        $onlyVerticalOverflow = @($visualReceipt.diagnostics | Where-Object { $_.code -ne 'viewer/viewport-overflow' }).Count -eq 0
-        $supportingChecksPass = $visualReceipt.readability.status -eq 'pass' -and $visualReceipt.captures.status -eq 'pass' -and $visualReceipt.viewerChrome.status -eq 'pass'
-        $withinBaseline = $true
-        foreach ($viewport in $visualReceipt.containment.viewports) {
-            $key = "$($viewport.width)x$($viewport.height)"
-            $limit = $diagramBaseline.maxScrollHeight.$key
-            if ($viewport.overflowX -or $null -eq $limit -or $viewport.scrollHeight -gt $limit) {
-                $withinBaseline = $false
-            }
-        }
-        $acceptedVisual = -not $diagramBaseline.strict -and $onlyVerticalOverflow -and $supportingChecksPass -and $withinBaseline
-        if ($acceptedVisual) {
-            $visualStatus = 'known-readable-scroll'
-        }
+    $usesReadableScroll = @($visualReceipt.containment.viewports | Where-Object { $_.verticalScrollAccepted }).Count -gt 0
+    if ($VisualPolicy -eq 'strict' -and $usesReadableScroll) {
+        throw "Visual evidence for $($item.Base) passes Archify's readable-scroll contract but does not satisfy the requested strict no-scroll policy."
     }
 
-    if (-not $acceptedVisual) {
-        throw "Visual evidence for $($item.Base) does not satisfy the '$VisualPolicy' policy. The Archify receipt remains '$($visualReceipt.status)'."
+    Copy-Item -LiteralPath $visualSummary.evidence.contactSheet -Destination (Join-Path $publicItemEvidence (Split-Path -Leaf $visualSummary.evidence.contactSheet)) -Force
+    foreach ($screenshot in $visualSummary.evidence.screenshots) {
+        Copy-Item -LiteralPath $screenshot.path -Destination (Join-Path $publicItemEvidence (Split-Path -Leaf $screenshot.path)) -Force
     }
+
+    $visualStatus = if ($usesReadableScroll) { 'readable-scroll-pass' } else { 'pass' }
 
     $results += [pscustomobject]@{
         Diagram = $item.Base
-        Validation = 'pass'
-        Delivery = 'pass'
+        Finalize = 'pass'
+        Browser = 'pass'
         Visual = $visualStatus
     }
 }

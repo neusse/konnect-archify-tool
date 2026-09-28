@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-5eead4.svg"></a>
-  <img alt="Archify 2.16.0" src="https://img.shields.io/badge/Archify-2.16.0-60a5fa.svg">
+  <img alt="Archify 3.0.1" src="https://img.shields.io/badge/Archify-3.0.1-60a5fa.svg">
   <img alt="Five diagram modes" src="https://img.shields.io/badge/diagram_modes-5-5eead4.svg">
   <img alt="Refresh: repeatable" src="https://img.shields.io/badge/refresh-repeatable-60a5fa.svg">
 </p>
@@ -17,7 +17,7 @@ A standalone documentation workspace for producing source-backed diagrams of
 [Konnect](https://github.com/neusse/Konnect) without adding Archify or Node.js
 to Konnect's runtime, repository, or release packages.
 
-This repository vendors the Archify v2.16.0 Codex skill under
+This repository vendors the Archify v3.0.1 Codex skill under
 `.agents/skills/archify`. Konnect remains an external, read-only evidence source.
 
 ## What belongs here
@@ -90,17 +90,17 @@ refresh workflow, and Konnect integration boundary.
 - Published as the standalone
   [`neusse/konnect-archify-tool`](https://github.com/neusse/konnect-archify-tool)
   repository on `main`.
-- Archify v2.16.0 copied project-locally and pinned by `skills-lock.json`.
+- Archify v3.0.1 copied project-locally and pinned by `skills-lock.json`.
 - Archify doctor passes on this workstation.
 - Five Konnect specifications cover every Archify diagram mode: architecture,
   workflow, sequence, data flow, and lifecycle.
 - Every source passes showcase validation with all nine artifact checks and zero
   composition errors or warnings, and every HTML artifact was produced by a
   successful transactional delivery.
-- Browser visual-check passes completely for the runtime architecture. The
-  other four artifacts pass capture, readability, and viewer-chrome checks but
-  exceed the strict 1440x900 no-scroll viewport. This remains the local release
-  blocker; see [diagrams/STATUS.md](diagrams/STATUS.md).
+- Browser visual-check passes for all five diagrams at 1440x900 and 2048x1320
+  in light and dark themes, with no readable-scroll allowance required. All 20
+  screenshots received a human visual review; see
+  [diagrams/STATUS.md](diagrams/STATUS.md).
 - The repeatable refresh skill is packaged in-repository and can be installed
   locally with `scripts/Install-LocalSkill.ps1`.
 

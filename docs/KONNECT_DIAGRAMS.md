@@ -1,7 +1,7 @@
 # Konnect architecture diagrams
 
 This repository keeps architecture visualization separate from Konnect's Rust
-runtime and KiCad integration. It vendors Archify v2.16.0 as a documentation
+runtime and KiCad integration. It vendors Archify v3.0.1 as a documentation
 build tool and produces five self-contained HTML files that Konnect can publish
 or open without Node.js, a web server, or an Archify installation.
 
@@ -36,9 +36,9 @@ reviewing the Git change range since the pinned Konnect revision.
 ## Reproducible refresh
 
 The project skill `.codex/skills/konnect-archify-refresh/` records the evidence
-map and update decisions. Its PowerShell script validates and delivers all five
-sources, writes SHA-256 receipts, runs browser checks, and compares visual
-results with `diagrams/visual-baseline.json`.
+map and update decisions. Its PowerShell script finalizes all five sources,
+writes portable SHA-256 receipts, runs browser checks, and captures four visual
+viewports per diagram under `diagrams/evidence/archify-3.0.1/`.
 
 From the installed skill or its repository copy:
 
@@ -48,12 +48,9 @@ pwsh -File .\.codex\skills\konnect-archify-refresh\scripts\Refresh-KonnectDiagra
   -KonnectRepo C:\path\to\Konnect
 ```
 
-Use `-VisualPolicy strict` to require Archify's no-scroll result at every tested
-desktop size. The default project baseline is intentionally transparent: the
-raw visual-check receipt remains failed when a detailed page scrolls, while the
-wrapper accepts only known vertical overflow with passing readability,
-viewer-chrome, and capture checks. Any horizontal overflow or larger scroll
-height is a regression.
+Use `-VisualPolicy strict` to reject Archify's readable-scroll allowance. The
+current five-diagram set passes that stricter condition: all required light and
+dark desktop captures are contained without horizontal or vertical scroll.
 
 ## Konnect integration
 
