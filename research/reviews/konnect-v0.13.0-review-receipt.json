@@ -1,0 +1,40 @@
+{
+  "kind": "static-code-review-publication",
+  "date": "2026-10-05",
+  "repository": "https://github.com/mixelpixx/Konnect",
+  "revision": "6bbe3e4f890ba1d37c0e5d5f38ccd03d90958c9e",
+  "baseline": "59a20e5ba93056c82cab4cd2d3c30361a3a0214a",
+  "archify": {
+    "invoked": false,
+    "regenerated": false,
+    "showcaseValidation": "not applicable; standalone reports"
+  },
+  "validation": {
+    "format": "pass",
+    "clippyWindows": "fail: unused REPLACED_BINARY_CHILD meta_tools.rs:862",
+    "workspaceLibTests": "pass; ignored tests not executed",
+    "doctests": "pass; 9 passed, 3 ignored",
+    "liveIpc": "not run",
+    "fullKicadE2e": "not run",
+    "benchmark": "not run"
+  },
+  "browser": {
+    "engine": "Codex in-app browser",
+    "desktop": {
+      "width": 1280,
+      "architectureScrollWidth": 1265,
+      "qualityScrollWidth": 1265
+    },
+    "narrow": {
+      "width": 390,
+      "qualityScrollWidth": 375,
+      "architectureScrollWidth": 375
+    },
+    "perceptualReview": "both reports inspected at desktop and narrow viewports; no horizontal page overflow",
+    "sourceDirty": false
+  },
+  "reports": [
+    "konnect-v0.13.0-architecture-review.html",
+    "konnect-v0.13.0-thermonuclear-review.html"
+  ]
+}
